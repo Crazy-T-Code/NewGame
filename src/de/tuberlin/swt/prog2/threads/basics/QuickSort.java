@@ -2,6 +2,17 @@ package de.tuberlin.swt.prog2.threads.basics;
 
 
 public class QuickSort extends Thread {
+	
+	private float[] toSort;
+	private int lower;
+	private int upper;
+	
+	public QuickSort(float[] toSort, int pivot, int length) {
+		this.toSort = toSort;
+		this.lower = lower;
+		this.upper = upper;
+	}
+
 	// TODO: constructor, fields, run()
 	
 /****************************************\Quicksort***********************************************************/
@@ -9,10 +20,27 @@ public class QuickSort extends Thread {
 	 * does always return the time it took to sort the array
 	 */
 	public static void quickSortMultithreaded(float[] toSort){
-		// TODO: -- prepare multithreaded execution
-		//	 -- create two Threads, assign them intervals of the float-array
-		//	 -- wait for the threads to terminate execution.
-				
+		int pivot = partition(toSort, toSort[toSort.length/2], 0, toSort.length -1);
+		
+		QuickSort q1 = new QuickSort(toSort, 0, pivot-1);
+		QuickSort q2 = new QuickSort(toSort, pivot, toSort.length -1);	
+		
+		q1.start();
+		q2.start();
+		
+		try {
+			q1.join();
+			q2.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void run(){
+		qSort(toSort,lower, upper);
+		
 	}
 	
 	/*

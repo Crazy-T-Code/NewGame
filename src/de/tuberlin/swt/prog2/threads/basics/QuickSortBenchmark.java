@@ -73,10 +73,10 @@ public class QuickSortBenchmark {
 		QuickSort.quickSortMultithreaded(arr2);
 		time2 = System.currentTimeMillis() - time2;
 
-//		printFloatArray(arr1,50);
-//		printFloatArray(arr2,50);
-//		System.out.println("Array 1 sorted: "+isSorted(arr1));
-//		System.out.println("Array 2 sorted: "+isSorted(arr2));
+		// printFloatArray(arr1,50);
+		// printFloatArray(arr2,50);
+		System.out.println("Array 1 sorted: "+isSorted(arr1));
+		System.out.println("Array 2 sorted: "+isSorted(arr2));
 
 		System.out.println("Singlethreaded Quicksort:   " + time1 + "ms");
 		System.out.println("Multithreaded Quicksort:    " + time2 + "ms");
