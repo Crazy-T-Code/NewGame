@@ -1,7 +1,6 @@
 package de.tuberlin.swt.prog2.maze;
 
 import java.awt.Point;
-import java.util.ArrayList;
 
 /**
  * Grid for a cellular automaton that works with four worker-threads and the
@@ -37,8 +36,7 @@ public class SharedMemoryGrid implements Grid {
 	 * List of all worker-threads that calculates parts of the next generation.
 	 */
 	// TODO: Un-Comment for HA 3.2.
-	//private ArrayList<GridThread> threads = new ArrayList<GridThread>();
-	
+	// private ArrayList<GridThread> threads = new ArrayList<GridThread>();
 
 	/**
 	 * Array of all numbers of neighbours that lead into surviving cells
@@ -53,15 +51,14 @@ public class SharedMemoryGrid implements Grid {
 	/**
 	 * Array of points to indicate all neighbours of a current cell.
 	 */
-	private static final Point NEIGHBOURS[] = { 
-			new Point(-1, -1), // left/above
-			new Point(-1, 0), // left
-			new Point(-1, 1), // left/below
-			new Point(0, -1), // above
-			new Point(0, 1), // below
-			new Point(1, -1), // right/above
-			new Point(1, 0), // right
-			new Point(1, 1) // right/below
+	private static final Point NEIGHBOURS[] = { new Point(-1, -1), // left/above
+	        new Point(-1, 0), // left
+	        new Point(-1, 1), // left/below
+	        new Point(0, -1), // above
+	        new Point(0, 1), // below
+	        new Point(1, -1), // right/above
+	        new Point(1, 0), // right
+	        new Point(1, 1) // right/below
 	};
 
 	/**
@@ -76,13 +73,56 @@ public class SharedMemoryGrid implements Grid {
 	 * @param bornRule
 	 *            array of numbers of neighbours needed to let a cell to be born
 	 */
-	public SharedMemoryGrid(int rows, int cols, int[] surviveRule, int[] bornRule) {
+	public SharedMemoryGrid(int rows, int cols, int[] surviveRule,
+	        int[] bornRule) {
+		// TODO: implement
+		/*** survive rule ***/
+		// wenn die Zelle lebt und Anzahl Nachbarzellen, lebend >= 1 und <=5
+		// dann Zelle lebt
+		/*** born rule ***/
+		// wenn Zelle tot und Anzahl Nachbarzellen, lebend = 3
+		// dann Zelle wird geboren -> lebt
+		/*** sonst, alle anderen Fälle ***/
+		// wenn Zelle lebt dann tot
+		// wenn Zelle tot dann tot
+	}
+
+	/**
+	 * Replaces the current grid with the new one
+	 */
+	private void applyNewGrid() {
+		// swap grids to save memory
+		boolean[][] temp = grid;
+		grid = newGrid;
+		newGrid = temp;
+	}
+
+	/**
+	 * Counts all living neighbour cells of a specific cell.</br></br>
+	 * 
+	 * HINT: To avoid the hassle with
+	 * <code>ArrayIndexOutOfBoundsException</code>s use a try/catch-block!
+	 * 
+	 * @param x
+	 *            x-coordinate of the specific cell
+	 * @param y
+	 *            y-coordinate of the specific cell
+	 * @return number of living neighbour cells (0-8 is possible)
+	 */
+	private int countNeighbours(int x, int y) {
+		int number = 0;
+		// TODO: implement
+		return number;
+	}
+
+	@Override
+	public void createInitialFigure() {
 		// TODO: implement
 	}
 
 	@Override
-	public int getRows() {
-		return rows;
+	public boolean getCell(int x, int y) {
+		return grid[x][y];
 	}
 
 	@Override
@@ -91,20 +131,23 @@ public class SharedMemoryGrid implements Grid {
 	}
 
 	@Override
-	public void toggleCell(int x, int y) {
-		grid[x][y] = !grid[x][y];
+	public int getGenerationNumber() {
+		return generation;
 	}
 
-	/**
-	 * Sets a specific cell in the current grid to the state living.
-	 * 
-	 * @param x
-	 *            x-coordinate of the specific cell
-	 * @param y
-	 *            y-coordinate of the specific cell
-	 */
-	private void setLivingCell(int x, int y) {
-		grid[x][y] = true;
+	@Override
+	public int getRows() {
+		return rows;
+	}
+
+	@Override
+	public void newGeneration() {
+		// TODO: implement
+	}
+
+	@Override
+	public void newGeneration(Point start, Point end) {
+		// TODO: implement
 	}
 
 	/**
@@ -120,15 +163,15 @@ public class SharedMemoryGrid implements Grid {
 	}
 
 	/**
-	 * Sets a specific cell in the next grid to the state living.
+	 * Sets a specific cell in the current grid to the state living.
 	 * 
 	 * @param x
 	 *            x-coordinate of the specific cell
 	 * @param y
 	 *            y-coordinate of the specific cell
 	 */
-	private void setNewLivingCell(int x, int y) {
-		newGrid[x][y] = true;
+	private void setLivingCell(int x, int y) {
+		grid[x][y] = true;
 	}
 
 	/**
@@ -143,64 +186,20 @@ public class SharedMemoryGrid implements Grid {
 		newGrid[x][y] = false;
 	}
 
-	@Override
-	public boolean getCell(int x, int y) {
-		return grid[x][y];
-	}
-
 	/**
-	 * Counts all living neighbour cells of a specific cell.</br></br>
-	 * 
-	 * HINT: To avoid the hassle with <code>ArrayIndexOutOfBoundsException</code>s use a try/catch-block! 
+	 * Sets a specific cell in the next grid to the state living.
 	 * 
 	 * @param x
 	 *            x-coordinate of the specific cell
 	 * @param y
 	 *            y-coordinate of the specific cell
-	 * @return number of living neighbour cells (0-8 is possible)
 	 */
-	private int countNeighbours(int x, int y) {
-		int number = 0;
-		// TODO: implement
-		return number;
-	}
-
-
-	
-	
-	@Override
-	public void newGeneration() {
-		// TODO: implement
-	}
-
-
-	@Override
-	public void newGeneration(Point start, Point end) {
-		// TODO: implement
-	}
-
-	
-	
-	/**
-	 * Replaces the current grid with the new one
-	 */
-	private void applyNewGrid() {
-		// swap grids to save memory
-		boolean[][] temp = grid;
-		grid = newGrid;
-		newGrid = temp;
+	private void setNewLivingCell(int x, int y) {
+		newGrid[x][y] = true;
 	}
 
 	@Override
-	public void createInitialFigure() {
-		// TODO: implement
-	}
-
-
-	
-	
-	@Override
-	public int getGenerationNumber() {
-		return generation;
+	public void toggleCell(int x, int y) {
+		grid[x][y] = !grid[x][y];
 	}
 }
