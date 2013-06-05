@@ -76,15 +76,7 @@ public class SharedMemoryGrid implements Grid {
 	public SharedMemoryGrid(int rows, int cols, int[] surviveRule,
 	        int[] bornRule) {
 		// TODO: implement
-		/*** survive rule ***/
-		// wenn die Zelle lebt und Anzahl Nachbarzellen, lebend >= 1 und <=5
-		// dann Zelle lebt
-		/*** born rule ***/
-		// wenn Zelle tot und Anzahl Nachbarzellen, lebend = 3
-		// dann Zelle wird geboren -> lebt
-		/*** sonst, alle anderen Fälle ***/
-		// wenn Zelle lebt dann tot
-		// wenn Zelle tot dann tot
+
 	}
 
 	/**
@@ -148,6 +140,21 @@ public class SharedMemoryGrid implements Grid {
 	@Override
 	public void newGeneration(Point start, Point end) {
 		// TODO: implement
+
+		/*** survive rule ***/
+		// wenn die Zelle lebt und Anzahl Nachbarzellen, lebend >= 1 und <= 5
+		// dann Zelle lebt
+		/*** born rule ***/
+		// wenn Zelle tot und Anzahl Nachbarzellen, lebend == 3
+		// dann Zelle wird geboren -> lebt
+		/*** sonst, alle anderen Fälle - Zelle tot - setDeadCell(int x, int y) ***/
+		// wenn Zelle lebt dann tot
+		// wenn Zelle tot dann tot
+
+		/*** Achtung zwei Spielfelder ***/
+		// 1. Feld aktuelle Generation - grid[x][y]
+		// 2. Feld kommende Generation - newGrid [x][y]
+
 	}
 
 	/**
