@@ -54,10 +54,12 @@ public class Mazectric extends JFrame {
 		// Neighbours needed to be born: 3
 		int[] bornRule = { 3 };
 
-//		int[] surviveRule = { 1, 3, 5 ,7 };
-//		int[] bornRule = { 1, 3, 5 ,7 };
-		
+		// int[] surviveRule = { 1, 3, 5 ,7 };
+		// int[] bornRule = { 1, 3, 5 ,7 };
+
 		Grid grid = null;
+		grid = new SharedMemoryGrid(rows, cols, surviveRule, bornRule);
+		grid.createInitialFigure();
 		// TODO: Create a real grid (using the surviveRule/bornRule arrays and
 		// rows/cols) an set the initial figure.
 
@@ -88,7 +90,7 @@ public class Mazectric extends JFrame {
 
 		JLabel lGenerations = new JLabel("Generation: ");
 
-		constraint.fill = GridBagConstraints.HORIZONTAL;		
+		constraint.fill = GridBagConstraints.HORIZONTAL;
 		constraint.gridx = 0;
 		constraint.gridy = 0;
 		constraint.gridwidth = 2;
@@ -102,13 +104,14 @@ public class Mazectric extends JFrame {
 
 		constraint.gridx = 1;
 		constraint.gridy = 1;
-		constraint.insets = new Insets(10, 5, 0, 5); // vertical and horizontal space
+		constraint.insets = new Insets(10, 5, 0, 5); // vertical and horizontal
+														// space
 		controlPane.add(bStart, constraint);
-		
+
 		constraint.gridx = 1;
 		constraint.gridy = 2;
 		controlPane.add(bStop, constraint);
-		
+
 		JLabel space = new JLabel();
 		constraint.gridx = 2;
 		constraint.gridy = 2;
