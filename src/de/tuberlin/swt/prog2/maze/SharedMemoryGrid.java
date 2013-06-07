@@ -1,6 +1,7 @@
 package de.tuberlin.swt.prog2.maze;
 
 import java.awt.Point;
+import java.util.ArrayList;
 
 /**
  * Grid for a cellular automaton that works with four worker-threads and the
@@ -10,12 +11,12 @@ public class SharedMemoryGrid implements Grid {
 	/**
 	 * Number of rows in the grid
 	 */
-	private int rows;
+	private final int rows;
 
 	/**
 	 * Number of columns in the grid
 	 */
-	private int cols;
+	private final int cols;
 
 	/**
 	 * Current grid that can be read safely and holds the current generation.
@@ -36,17 +37,17 @@ public class SharedMemoryGrid implements Grid {
 	 * List of all worker-threads that calculates parts of the next generation.
 	 */
 	// TODO: Un-Comment for HA 3.2.
-	// private ArrayList<GridThread> threads = new ArrayList<GridThread>();
+	private final ArrayList<GridThread> threads = new ArrayList<GridThread>();
 
 	/**
 	 * Array of all numbers of neighbours that lead into surviving cells
 	 */
-	private int neighboursLeadToSurvival[];
+	private final int neighboursLeadToSurvival[];
 
 	/**
 	 * Array of all numbers of neighbours that lead into new born cells
 	 */
-	private int neighboursLeadToBirth[];
+	private final int neighboursLeadToBirth[];
 
 	/**
 	 * Array of points to indicate all neighbours of a current cell.
@@ -75,8 +76,14 @@ public class SharedMemoryGrid implements Grid {
 	 */
 	public SharedMemoryGrid(int rows, int cols, int[] surviveRule,
 	        int[] bornRule) {
-		// TODO: implement
-
+		// TODO: implement - done
+		this.rows = rows;
+		this.cols = cols;
+		this.neighboursLeadToSurvival = surviveRule;
+		this.neighboursLeadToBirth = bornRule;
+		this.grid = new boolean[this.rows][this.cols];
+		this.newGrid = new boolean[this.rows][this.cols];
+		createInitialFigure();
 	}
 
 	/**
@@ -103,13 +110,24 @@ public class SharedMemoryGrid implements Grid {
 	 */
 	private int countNeighbours(int x, int y) {
 		int number = 0;
-		// TODO: implement
+		// TODO: implement - done
+		for (int i = 0; i < NEIGHBOURS.length; i++) {
+			if (getCell(x + NEIGHBOURS[i].x, y + NEIGHBOURS[i].y)) {
+				number++;
+			}
+		}
 		return number;
 	}
 
 	@Override
 	public void createInitialFigure() {
 		// TODO: implement
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				setLivingCell(this.rows / 2 - 5 + i, this.cols / 2 - 5 + j);
+				setNewLivingCell(this.rows / 2 - 5 + i, this.cols / 2 - 5 + j);
+			}
+		}
 	}
 
 	@Override
@@ -132,9 +150,35 @@ public class SharedMemoryGrid implements Grid {
 		return rows;
 	}
 
+	public boolean inArray(int number, int[] array) {
+		for (int i = 0; i < array.length; i++) {
+			if (number == array[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public void newGeneration() {
 		// TODO: implement
+
+		GridThread thread1 = new GridThread(SharedMemoryGrid.this, new Point(1,
+		        1), new Point(getCols() / 2, getRows() - 1));
+		GridThread thread2 = new GridThread(SharedMemoryGrid.this, new Point(
+		        getCols() / 2, 1), new Point(getCols() - 1, getRows() - 1));
+
+		thread1.start();
+		thread2.start();
+
+		try {
+			thread1.join();
+			thread2.join();
+		} catch (InterruptedException e) {
+		}
+
+		applyNewGrid();
+		this.generation++;
 	}
 
 	@Override
@@ -147,13 +191,43 @@ public class SharedMemoryGrid implements Grid {
 		/*** born rule ***/
 		// wenn Zelle tot und Anzahl Nachbarzellen, lebend == 3
 		// dann Zelle wird geboren -> lebt
-		/*** sonst, alle anderen Fälle - Zelle tot - setDeadCell(int x, int y) ***/
+		/*** sonst, alle anderen Faelle - Zelle tot - setDeadCell(int x, int y) ***/
 		// wenn Zelle lebt dann tot
 		// wenn Zelle tot dann tot
 
 		/*** Achtung zwei Spielfelder ***/
 		// 1. Feld aktuelle Generation - grid[x][y]
 		// 2. Feld kommende Generation - newGrid [x][y]
+
+		/*** weiteres ***/
+		// jede Zelle hat zwei Zustaende - boolean - lebt:true, tot:false
+
+		// neu
+		// prueft fuer alle Zeilen ob die Zelle lebt oder tot ist
+		for (int zeile = start.x; zeile < end.x; zeile++) {
+			// prueft fuer alle Spalten ob die Zelle lebt oder tot ist
+			for (int spalte = start.y; spalte < end.y; spalte++) {
+				// if cell is living
+				if (getCell(zeile, spalte)) {
+					// prueft ob die Zelle sterben muss
+					if (inArray(countNeighbours(zeile, spalte),
+					        neighboursLeadToSurvival)) {
+						setNewLivingCell(zeile, spalte);
+					} else {
+						setNewDeadCell(zeile, spalte);
+					}
+				} else { // die Zelle ist tot
+					// check whether the dead cell will be born
+					if (inArray(countNeighbours(zeile, spalte),
+					        neighboursLeadToBirth)) {
+						setNewLivingCell(zeile, spalte);
+					} else {
+						setNewDeadCell(zeile, spalte);
+					}
+				}
+
+			}
+		}
 
 	}
 
