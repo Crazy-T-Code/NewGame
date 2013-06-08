@@ -244,6 +244,8 @@ public class SharedMemoryGrid implements Grid {
 				if (getCell(r, c)) {
 					// it keeps living
 					for (int i = 0; i < neighboursLeadToSurvival.length; i++) {
+						// FIXME: like it is here the cell will only survive, if it
+						// has exactly the last number of the neighboursLeadToSurvival
 						if (neighboursLeadToSurvival[i] == countNeighbours(r, c)) {
 							setNewLivingCell(r, c);
 						} else {
@@ -255,6 +257,10 @@ public class SharedMemoryGrid implements Grid {
 				} else {
 					for (int i = 0; i < neighboursLeadToBirth.length; i++) {
 						// revived
+						// FIXME: like it is here the cell will only survive, if it
+						// has exactly the last number of the neighboursLeadToSurvival
+						// BTW: in the current task, there is only 1 neighboursLeadToBirth
+						// and it will execute correctly, but it isn't correct at all.
 						if (neighboursLeadToBirth[i] == countNeighbours(r, c)) {
 							setNewLivingCell(r, c);
 						} else {
