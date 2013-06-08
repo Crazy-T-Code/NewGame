@@ -2,7 +2,6 @@ package de.tuberlin.swt.prog2.maze;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Grid for a cellular automaton that works with four worker-threads and the
@@ -10,15 +9,40 @@ import java.util.Arrays;
  */
 public class SharedMemoryGrid implements Grid {
 
+	private class GridThread extends Thread {
+
+		private final Point start;
+		private final Point end;
+		private final SharedMemoryGrid sharedMemoryGrid;
+
+		public GridThread(SharedMemoryGrid sharedMemoryGrid, Point start,
+		        Point end) {
+			this.sharedMemoryGrid = sharedMemoryGrid;
+			this.start = start;
+			this.end = end;
+		}
+
+		@Override
+		public void run() {
+			sharedMemoryGrid.newGeneration(start, end);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
 	/**
 	 * Number of rows in the grid
 	 */
-	private int rows;
+	private final int rows;
 
 	/**
 	 * Number of columns in the grid
 	 */
-	private int cols;
+	private final int cols;
 
 	/**
 	 * Current grid that can be read safely and holds the current generation.
@@ -38,29 +62,29 @@ public class SharedMemoryGrid implements Grid {
 	/**
 	 * List of all worker-threads that calculates parts of the next generation.
 	 */
-	private ArrayList<GridThread> threads = new ArrayList<GridThread>();
+	private final ArrayList<GridThread> threads = new ArrayList<GridThread>();
 
 	/**
 	 * Array of all numbers of neighbours that lead into surviving cells
 	 */
-	private int neighboursLeadToSurvival[];
+	private final int neighboursLeadToSurvival[];
 
 	/**
 	 * Array of all numbers of neighbours that lead into new born cells
 	 */
-	private int neighboursLeadToBirth[];
+	private final int neighboursLeadToBirth[];
 
 	/**
 	 * Array of points to indicate all neighbours of a current cell.
 	 */
 	private static final Point NEIGHBOURS[] = { new Point(-1, -1), // left/above
-			new Point(-1, 0), // left
-			new Point(-1, 1), // left/below
-			new Point(0, -1), // above
-			new Point(0, 1), // below
-			new Point(1, -1), // right/above
-			new Point(1, 0), // right
-			new Point(1, 1) // right/below
+	        new Point(-1, 0), // left
+	        new Point(-1, 1), // left/below
+	        new Point(0, -1), // above
+	        new Point(0, 1), // below
+	        new Point(1, -1), // right/above
+	        new Point(1, 0), // right
+	        new Point(1, 1) // right/below
 	};
 
 	/**
@@ -76,7 +100,7 @@ public class SharedMemoryGrid implements Grid {
 	 *            array of numbers of neighbours needed to let a cell to be born
 	 */
 	public SharedMemoryGrid(int rows, int cols, int[] surviveRule,
-			int[] bornRule) {
+	        int[] bornRule) {
 
 		this.rows = rows;
 		this.cols = cols;
@@ -88,72 +112,14 @@ public class SharedMemoryGrid implements Grid {
 
 	}
 
-	@Override
-	public int getRows() {
-		return rows;
-	}
-
-	@Override
-	public int getCols() {
-		return cols;
-	}
-
-	@Override
-	public void toggleCell(int x, int y) {
-		grid[x][y] = !grid[x][y];
-	}
-
 	/**
-	 * Sets a specific cell in the current grid to the state living.
-	 * 
-	 * @param x
-	 *            x-coordinate of the specific cell
-	 * @param y
-	 *            y-coordinate of the specific cell
+	 * Replaces the current grid with the new one
 	 */
-	private void setLivingCell(int x, int y) {
-		grid[x][y] = true;
-	}
-
-	/**
-	 * Sets a specific cell in the current grid to the state dead.
-	 * 
-	 * @param x
-	 *            x-coordinate of the specific cell
-	 * @param y
-	 *            y-coordinate of the specific cell
-	 */
-	private void setDeadCell(int x, int y) {
-		grid[x][y] = false;
-	}
-
-	/**
-	 * Sets a specific cell in the next grid to the state living.
-	 * 
-	 * @param x
-	 *            x-coordinate of the specific cell
-	 * @param y
-	 *            y-coordinate of the specific cell
-	 */
-	private void setNewLivingCell(int x, int y) {
-		newGrid[x][y] = true;
-	}
-
-	/**
-	 * Sets a specific cell in the next grid to the state dead.
-	 * 
-	 * @param x
-	 *            x-coordinate of the specific cell
-	 * @param y
-	 *            y-coordinate of the specific cell
-	 */
-	private void setNewDeadCell(int x, int y) {
-		newGrid[x][y] = false;
-	}
-
-	@Override
-	public boolean getCell(int x, int y) {
-		return grid[x][y];
+	private void applyNewGrid() {
+		// swap grids to save memory
+		boolean[][] temp = grid;
+		grid = newGrid;
+		newGrid = temp;
 	}
 
 	/**
@@ -189,6 +155,50 @@ public class SharedMemoryGrid implements Grid {
 	}
 
 	@Override
+	public void createInitialFigure() {
+
+		/*
+		 * int(rows/2-4 bis rows/2+5)
+		 */
+
+		for (int r = rows / 2 - 4; r <= rows / 2 + 5; r++) {
+			for (int c = cols / 2 - 4; c <= cols / 2 + 5; c++) {
+				setLivingCell(r, c);
+				setNewLivingCell(r, c);
+			}
+		}
+	}
+
+	@Override
+	public boolean getCell(int x, int y) {
+		return grid[x][y];
+	}
+
+	@Override
+	public int getCols() {
+		return cols;
+	}
+
+	@Override
+	public int getGenerationNumber() {
+		return generation;
+	}
+
+	@Override
+	public int getRows() {
+		return rows;
+	}
+
+	public boolean inArray(int number, int[] array) {
+		for (int i = 0; i < array.length; i++) {
+			if (number == array[i]) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
 	public void newGeneration() {
 		/*
 		 * threads adden
@@ -200,15 +210,13 @@ public class SharedMemoryGrid implements Grid {
 		 * newGen++
 		 */
 		GridThread threadOne = new GridThread(SharedMemoryGrid.this, new Point(
-				1, 1), new Point((int) (getCols() / 2), getRows() - 1));
+		        1, 1), new Point(getCols() / 2, getRows() - 1));
 		GridThread threadTwo = new GridThread(SharedMemoryGrid.this, new Point(
-				(int) (getCols() / 2), 1), new Point(getRows() - 1,
-				getCols() - 1));
-
-		threadOne.start();
-		threadTwo.start();
+		        getCols() / 2, 1), new Point(getRows() - 1, getCols() - 1));
 
 		try {
+			threadOne.start();
+			threadTwo.start();
 			threadOne.join();
 			threadTwo.join();
 			applyNewGrid();
@@ -274,66 +282,56 @@ public class SharedMemoryGrid implements Grid {
 
 	}
 
-	public boolean inArray(int number, int[] array) {
-		for (int i = 0; i < array.length; i++) {
-			if (number == array[i]) {
-				return true;
-			}
-		}
-		return false;
+	/**
+	 * Sets a specific cell in the current grid to the state dead.
+	 * 
+	 * @param x
+	 *            x-coordinate of the specific cell
+	 * @param y
+	 *            y-coordinate of the specific cell
+	 */
+	private void setDeadCell(int x, int y) {
+		grid[x][y] = false;
 	}
 
 	/**
-	 * Replaces the current grid with the new one
+	 * Sets a specific cell in the current grid to the state living.
+	 * 
+	 * @param x
+	 *            x-coordinate of the specific cell
+	 * @param y
+	 *            y-coordinate of the specific cell
 	 */
-	private void applyNewGrid() {
-		// swap grids to save memory
-		boolean[][] temp = grid;
-		grid = newGrid;
-		newGrid = temp;
+	private void setLivingCell(int x, int y) {
+		grid[x][y] = true;
+	}
+
+	/**
+	 * Sets a specific cell in the next grid to the state dead.
+	 * 
+	 * @param x
+	 *            x-coordinate of the specific cell
+	 * @param y
+	 *            y-coordinate of the specific cell
+	 */
+	private void setNewDeadCell(int x, int y) {
+		newGrid[x][y] = false;
+	}
+
+	/**
+	 * Sets a specific cell in the next grid to the state living.
+	 * 
+	 * @param x
+	 *            x-coordinate of the specific cell
+	 * @param y
+	 *            y-coordinate of the specific cell
+	 */
+	private void setNewLivingCell(int x, int y) {
+		newGrid[x][y] = true;
 	}
 
 	@Override
-	public void createInitialFigure() {
-
-		/*
-		 * int(rows/2-4 bis rows/2+5)
-		 */
-
-		for (int r = (int) (rows / 2 - 4); r <= (int) (rows / 2 + 5); r++) {
-			for (int c = (int) (cols / 2 - 4); c <= (int) (cols / 2 + 5); c++) {
-				setLivingCell(r, c);
-				setNewLivingCell(r, c);
-			}
-		}
-	}
-
-	@Override
-	public int getGenerationNumber() {
-		return generation;
-	}
-
-	private class GridThread extends Thread {
-
-		private Point start;
-		private Point end;
-		private SharedMemoryGrid sharedMemoryGrid;
-
-		public GridThread(SharedMemoryGrid sharedMemoryGrid, Point start,
-				Point end) {
-			this.sharedMemoryGrid = sharedMemoryGrid;
-			this.start = start;
-			this.end = end;
-		}
-
-		public void run() {
-			sharedMemoryGrid.newGeneration(start, end);
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+	public void toggleCell(int x, int y) {
+		grid[x][y] = !grid[x][y];
 	}
 }
