@@ -10,12 +10,12 @@ public class SharedMemoryGrid implements Grid {
 	/**
 	 * Number of rows in the grid
 	 */
-	private int rows;
+	private final int rows;
 
 	/**
 	 * Number of columns in the grid
 	 */
-	private int cols;
+	private final int cols;
 
 	/**
 	 * Current grid that can be read safely and holds the current generation.
@@ -30,7 +30,7 @@ public class SharedMemoryGrid implements Grid {
 	/**
 	 * Number of the current generation
 	 */
-	private int generation;
+	private final int generation;
 
 	/**
 	 * List of all worker-threads that calculates parts of the next generation.
@@ -41,12 +41,12 @@ public class SharedMemoryGrid implements Grid {
 	/**
 	 * Array of all numbers of neighbours that lead into surviving cells
 	 */
-	private int neighboursLeadToSurvival[];
+	private final int neighboursLeadToSurvival[];
 
 	/**
 	 * Array of all numbers of neighbours that lead into new born cells
 	 */
-	private int neighboursLeadToBirth[];
+	private final int neighboursLeadToBirth[];
 
 	/**
 	 * Array of points to indicate all neighbours of a current cell.
@@ -77,11 +77,25 @@ public class SharedMemoryGrid implements Grid {
 	        int[] bornRule) {
 		// TODO: implement
 
+		this.rows = rows;
+		this.cols = cols;
+		this.neighboursLeadToBirth = bornRule;
+		this.neighboursLeadToSurvival = surviveRule;
+
+		generation = 0;
+		grid = new boolean[cols][rows];
+		newGrid = new boolean[cols][rows];
 	}
 
 	@Override
 	public void createInitialFigure() {
-		// TODO: implement
+		int midX = getCols() / 2;
+		int midY = getRows() / 2;
+		for (int x = midX - 5; x < midX + 5; x++)
+			for (int y = midY - 5; y < midY + 5; y++) {
+				setNewLivingCell(x, y);
+				setLivingCell(x, y);
+			}
 	}
 
 	@Override

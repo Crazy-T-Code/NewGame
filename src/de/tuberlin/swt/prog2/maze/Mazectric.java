@@ -57,9 +57,10 @@ public class Mazectric extends JFrame {
 		// int[] surviveRule = { 1, 3, 5 ,7 };
 		// int[] bornRule = { 1, 3, 5 ,7 };
 
-		Grid grid = null;
 		// TODO: Create a real grid (using the surviveRule/bornRule arrays and
 		// rows/cols) an set the initial figure.
+		Grid grid = new SharedMemoryGrid(rows, cols, surviveRule, bornRule);
+		grid.createInitialFigure();
 
 		// create GUI
 		JLabel lGenerationsNumber = new JLabel();
