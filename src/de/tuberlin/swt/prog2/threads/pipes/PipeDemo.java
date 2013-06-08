@@ -33,6 +33,40 @@ public class PipeDemo {
 	}
 }
 
+/********************* internal class Receiver ***********************/
+class Receiver extends Thread {
+
+	DataInputStream in;
+
+	public Receiver(PipedInputStream in) {
+		this.in = new DataInputStream(in);
+	}
+
+	@Override
+	public void run() {
+		int i;
+		while (!isInterrupted()) {
+			try {
+				i = in.readInt();
+				if (i == -1) {
+					interrupt();
+					System.out.println(this.getName()
+					        + ": Sender signalled to stop. Terminating");
+				} else
+					System.out.println(this.getName() + ": "
+					        + "Sender slept for " + i + "ms");
+
+			} catch (IOException e) {
+				System.err.println(this.getName() + ": " + e.getMessage());
+			}
+
+		}
+
+	}
+}
+
+/******************** \internal class Sender *************************/
+
 /******************** internal class Sender *************************/
 
 class Sender extends Thread {
@@ -52,7 +86,7 @@ class Sender extends Thread {
 			try {
 				sleepytime = (int) (Math.random() * 1000);
 				System.out.println(getName() + ": I sleep for " + sleepytime
-						+ "ms now");
+				        + "ms now");
 				sleep(sleepytime);
 				out.writeInt(sleepytime);
 				out.flush();
@@ -68,40 +102,6 @@ class Sender extends Thread {
 		} catch (IOException e) {
 			System.err.println(this.getName() + ": " + e.getMessage());
 		}
-	}
-}
-
-/******************** \internal class Sender *************************/
-
-/********************* internal class Receiver ***********************/
-class Receiver extends Thread {
-
-	DataInputStream in;
-
-	public Receiver(PipedInputStream in) {
-		this.in = new DataInputStream(in);
-	}
-
-	@Override
-	public void run() {
-		int i;
-		while (!isInterrupted()) {
-			try {
-				i = in.readInt();
-				if (i == -1) {
-					interrupt();
-					System.out.println(this.getName()
-							+ ": Sender signalled to stop. Terminating");
-				} else
-					System.out.println(this.getName() + ": "
-							+ "Sender slept for " + i + "ms");
-
-			} catch (IOException e) {
-				System.err.println(this.getName() + ": " + e.getMessage());
-			}
-
-		}
-
 	}
 }
 

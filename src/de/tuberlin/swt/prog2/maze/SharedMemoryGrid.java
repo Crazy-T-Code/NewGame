@@ -79,34 +79,6 @@ public class SharedMemoryGrid implements Grid {
 
 	}
 
-	/**
-	 * Replaces the current grid with the new one
-	 */
-	private void applyNewGrid() {
-		// swap grids to save memory
-		boolean[][] temp = grid;
-		grid = newGrid;
-		newGrid = temp;
-	}
-
-	/**
-	 * Counts all living neighbour cells of a specific cell.</br></br>
-	 * 
-	 * HINT: To avoid the hassle with
-	 * <code>ArrayIndexOutOfBoundsException</code>s use a try/catch-block!
-	 * 
-	 * @param x
-	 *            x-coordinate of the specific cell
-	 * @param y
-	 *            y-coordinate of the specific cell
-	 * @return number of living neighbour cells (0-8 is possible)
-	 */
-	private int countNeighbours(int x, int y) {
-		int number = 0;
-		// TODO: implement
-		return number;
-	}
-
 	@Override
 	public void createInitialFigure() {
 		// TODO: implement
@@ -147,7 +119,7 @@ public class SharedMemoryGrid implements Grid {
 		/*** born rule ***/
 		// wenn Zelle tot und Anzahl Nachbarzellen, lebend == 3
 		// dann Zelle wird geboren -> lebt
-		/*** sonst, alle anderen Fälle - Zelle tot - setDeadCell(int x, int y) ***/
+		/*** sonst, alle anderen Fï¿½lle - Zelle tot - setDeadCell(int x, int y) ***/
 		// wenn Zelle lebt dann tot
 		// wenn Zelle tot dann tot
 
@@ -155,6 +127,39 @@ public class SharedMemoryGrid implements Grid {
 		// 1. Feld aktuelle Generation - grid[x][y]
 		// 2. Feld kommende Generation - newGrid [x][y]
 
+	}
+
+	@Override
+	public void toggleCell(int x, int y) {
+		grid[x][y] = !grid[x][y];
+	}
+
+	/**
+	 * Replaces the current grid with the new one
+	 */
+	private void applyNewGrid() {
+		// swap grids to save memory
+		boolean[][] temp = grid;
+		grid = newGrid;
+		newGrid = temp;
+	}
+
+	/**
+	 * Counts all living neighbour cells of a specific cell.</br></br>
+	 * 
+	 * HINT: To avoid the hassle with
+	 * <code>ArrayIndexOutOfBoundsException</code>s use a try/catch-block!
+	 * 
+	 * @param x
+	 *            x-coordinate of the specific cell
+	 * @param y
+	 *            y-coordinate of the specific cell
+	 * @return number of living neighbour cells (0-8 is possible)
+	 */
+	private int countNeighbours(int x, int y) {
+		int number = 0;
+		// TODO: implement
+		return number;
 	}
 
 	/**
@@ -203,10 +208,5 @@ public class SharedMemoryGrid implements Grid {
 	 */
 	private void setNewLivingCell(int x, int y) {
 		newGrid[x][y] = true;
-	}
-
-	@Override
-	public void toggleCell(int x, int y) {
-		grid[x][y] = !grid[x][y];
 	}
 }
