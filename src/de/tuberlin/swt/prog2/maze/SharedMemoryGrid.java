@@ -93,7 +93,6 @@ public class SharedMemoryGrid implements Grid {
 		int midY = getRows() / 2;
 		for (int x = midX - 5; x < midX + 5; x++)
 			for (int y = midY - 5; y < midY + 5; y++) {
-				setNewLivingCell(x, y);
 				setLivingCell(x, y);
 			}
 	}
@@ -120,28 +119,59 @@ public class SharedMemoryGrid implements Grid {
 
 	@Override
 	public void newGeneration() {
-		// TODO: implement
-		generation++;
+		newGeneration(new Point(0, 0), new Point(cols - 1, rows - 1));
 	}
 
 	@Override
 	public void newGeneration(Point start, Point end) {
-		// TODO: implement
+		generation++;
 
-		/*** survive rule ***/
-		// wenn die Zelle lebt und Anzahl Nachbarzellen, lebend >= 1 und <= 5
-		// dann Zelle lebt
-		/*** born rule ***/
-		// wenn Zelle tot und Anzahl Nachbarzellen, lebend == 3
-		// dann Zelle wird geboren -> lebt
-		/*** sonst, alle anderen F�lle - Zelle tot - setDeadCell(int x, int y) ***/
-		// wenn Zelle lebt dann tot
-		// wenn Zelle tot dann tot
+		for (int x = start.x; x <= end.x; x++) {
+			for (int y = start.y; y <= end.y; y++) {
 
-		/*** Achtung zwei Spielfelder ***/
-		// 1. Feld aktuelle Generation - grid[x][y]
-		// 2. Feld kommende Generation - newGrid [x][y]
+				int neighbours = countNeighbours(x, y);
+				if (isAlive(x, y)) {
+					/*** survive rule ***/
+					// wenn die Zelle lebt und Anzahl Nachbarzellen, lebend >= 1
+					// und <= 5 dann Zelle lebt
+					boolean survive = false;
+					for (int lLifeCount : neighboursLeadToSurvival) {
+						if (neighbours == lLifeCount)
+							survive = true;
+					}
+					if (survive) {
+						// zelle überlebt
+						setNewLivingCell(x, y);
+					} else {
+						// zelle überlebt nicht => death
+						setNewDeadCell(x, y);
+					}
+				} else {
+					// is Dead
+					/*** born rule ***/
+					// wenn Zelle tot und Anzahl Nachbarzellen, lebend == 3
+					// dann Zelle wird geboren -> lebt
+					boolean birth = false;
+					for (int lLifeCount : neighboursLeadToBirth) {
+						if (neighbours == lLifeCount)
+							birth = true;
+					}
+					if (birth) {
+						setNewLivingCell(x, y);
+					} else {
+						setNewDeadCell(x, y);
+					}
+				}
+				/***
+				 * sonst, alle anderen Fälle - Zellen sind schon tot
+				 ***/
 
+				/*** Achtung zwei Spielfelder ***/
+				// 1. Feld aktuelle Generation - grid[x][y] -> nur lesend
+				// 2. Feld kommende Generation - newGrid [x][y] -> schreibend
+			}
+		}
+		applyNewGrid();
 	}
 
 	@Override
@@ -174,7 +204,43 @@ public class SharedMemoryGrid implements Grid {
 	private int countNeighbours(int x, int y) {
 		int number = 0;
 		// TODO: implement
+
+		for (Point lNeighbour : NEIGHBOURS) {
+			try {
+				if (isAlive(x + lNeighbour.x, y + lNeighbour.y))
+					number++;
+			} catch (Exception e) {
+
+			}
+		}
 		return number;
+	}
+
+	/**
+	 * TODO comment
+	 * 
+	 * @param aX
+	 * @param aY
+	 * @return
+	 */
+	private boolean isAlive(int x, int y) {
+		return grid[x][y];
+	}
+
+	private void printNeighbours(int x, int y) {
+		for (Point lNeighbour : NEIGHBOURS) {
+			System.out.println("x:" + (x + lNeighbour.x) + ", y:"
+			        + (y + lNeighbour.y));
+			try {
+				if (isAlive(x + lNeighbour.x, y + lNeighbour.y))
+					System.out.println('+');
+				else
+					System.out.println('-');
+			} catch (Exception e) {
+				System.out.println('~');
+			}
+		}
+
 	}
 
 	/**
