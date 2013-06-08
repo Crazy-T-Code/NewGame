@@ -18,17 +18,17 @@ public class GridCanvas extends Canvas {
 	/**
 	 * Grid that should be paint in this canvas.
 	 */
-	private Grid grid;
+	private final Grid grid;
 
 	/**
 	 * Size of one square cell. (cellSize * cellSize)
 	 */
-	private int cellSize;
+	private final int cellSize;
 
 	/**
 	 * Label that shows the number of the current generation.
 	 */
-	private JLabel lGenerationsNumber;
+	private final JLabel lGenerationsNumber;
 
 	/**
 	 * Color of an living cell.
@@ -49,6 +49,8 @@ public class GridCanvas extends Canvas {
 	 * Indicator if the calculation of a new generation should be done.
 	 */
 	boolean running = false;
+
+	Thread worker = null;
 
 	/**
 	 * Constructor
@@ -137,15 +139,38 @@ public class GridCanvas extends Canvas {
 		// TODO: Create new Thread that calculates and paints new generations
 		// until stopped.
 
+		if (running) // already started
+			return;
+
+		worker = new Thread() {
+			@Override
+			public void run() {
+				try {
+					while (true) {
+						sleep(TIME_BETWEEN_PAINTINGS);
+						grid.newGeneration();
+						// System.out.println("New Generation "
+						// + grid.getGenerationNumber());
+						repaint();
+					}
+				} catch (InterruptedException ex) {
+					// ex.printStackTrace(System.err);
+				}
+			}
+		};
+		worker.start();
+		running = true;
 	}
 
 	/**
 	 * Stops the current running calculation of new generations
 	 */
 	public void stop() {
-
 		// TODO: Stopping current generation calculations and paintings
-
+		if (running && worker.isAlive()) {
+			worker.interrupt();
+			running = false;
+		}
 	}
 
 	@Override

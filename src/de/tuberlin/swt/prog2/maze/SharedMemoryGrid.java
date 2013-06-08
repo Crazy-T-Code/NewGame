@@ -30,7 +30,7 @@ public class SharedMemoryGrid implements Grid {
 	/**
 	 * Number of the current generation
 	 */
-	private final int generation;
+	private int generation;
 
 	/**
 	 * List of all worker-threads that calculates parts of the next generation.
@@ -121,6 +121,7 @@ public class SharedMemoryGrid implements Grid {
 	@Override
 	public void newGeneration() {
 		// TODO: implement
+		generation++;
 	}
 
 	@Override
